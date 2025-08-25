@@ -3,338 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ines</title>
+    <title>音頻播放頁面</title>
     <style>
         body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             margin: 0;
-            padding: 0;
-            background: #000000;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .container {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .writing-area {
-            position: relative;
-            padding: 60px;
-            min-width: 900px;
-            min-height: 400px;
-        }
-
-        .text-line {
-            position: relative;
-            margin: 60px 0;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .character {
-            position: relative;
-            display: inline-block;
-            margin: 0 12px;
-            width: 60px;
-            height: 100px;
-        }
-
-        .space {
-            width: 30px;
-        }
-
-        /* 點陣效果 */
-        .dot {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0;
-            box-shadow: 0 0 8px rgba(255,255,255,0.8);
-        }
-
-        .heart-dot {
-            background: #ff1744;
-            box-shadow: 0 0 12px rgba(255, 23, 68, 0.8);
-            width: 6px;
-            height: 6px;
-        }
-
-        @keyframes dotAppear {
-            0% {
-                opacity: 0;
-                transform: scale(0);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes heartPulse {
-            0%, 100% { 
-                transform: scale(1);
-                box-shadow: 0 0 12px rgba(255, 23, 68, 0.8);
-            }
-            50% { 
-                transform: scale(1.1);
-                box-shadow: 0 0 20px rgba(255, 23, 68, 1);
-            }
-        }
-
-        /* 立可白瓶裝飾 */
-        .correction-pen {
-            position: absolute;
-            bottom: 30px;
-            right: 60px;
-            width: 30px;
-            height: 120px;
-            background: linear-gradient(to bottom, #f5f5f5 75%, #444 75%);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            transform: rotate(20deg);
-            opacity: 0.9;
-            box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
         }
 
-        .correction-pen::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background: #666;
-            border-radius: 50%;
+        h3 {
+            color: #333;
+            margin: 20px 0;
+            font-size: 1.5em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
 
+        .audio-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
 
+        audio {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .credits {
+            margin-top: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .credits h3 {
+            color: #555;
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
-    
-    
-    <table align="center">
-        <tr>
-            <td>
-                <div class="container">
-                    <div class="writing-area">
-                        <div class="text-line" id="line1"></div>
-                        <div class="text-line" id="line2"></div>
-                        <div class="correction-pen"></div>
-                        
-                        <!-- 音檔播放 -->
-                        <audio id="audio1" preload="auto" style="display: none;">
-                            <source th:src="@{/3333.mp3}" type="audio/wav">
-                            <source th:src="@{/3333.mp3}" type="audio/mpeg">
-                        </audio>
-                        
-                        <audio id="audio2" preload="auto" style="display: none;">
-                            <source th:src="@{/4444.mp3}" type="audio/wav">
-                            <source th:src="@{/4444.mp3}" type="audio/mpeg">
-                        </audio>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <script>
-        // 英文字母點陣字型定義 (更像真實文字的點陣)
-        const dotPatterns = {
-            'i': [
-                [2,0], [2,2], [2,3], [2,4], [2,5], [2,6], [1,7], [2,7], [3,7]
-            ],
-            'l': [
-                [1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [2,7], [3,7]
-            ],
-            'o': [
-                [1,1], [2,1], [3,1], [0,2], [4,2], [0,3], [4,3], [0,4], [4,4], [0,5], [4,5], [1,6], [2,6], [3,6]
-            ],
-            'v': [
-                [0,1], [4,1], [0,2], [4,2], [0,3], [4,3], [1,4], [3,4], [1,5], [3,5], [2,6]
-            ],
-            'e': [
-                [0,1], [1,1], [2,1], [3,1], [0,2], [0,3], [0,4], [1,4], [2,4], [0,5], [0,6], [0,7], [1,7], [2,7], [3,7]
-            ],
-            'u': [
-                [0,1], [4,1], [0,2], [4,2], [0,3], [4,3], [0,4], [4,4], [0,5], [4,5], [0,6], [4,6], [1,7], [2,7], [3,7]
-            ],
-            'w': [
-                [0,1], [6,1], [0,2], [6,2], [0,3], [6,3], [0,4], [3,4], [6,4], [0,5], [3,5], [6,5], [1,6], [2,6], [4,6], [5,6]
-            ],
-            // 加寬w字母的字符容器
-            'w_wide': true,
-            'heart': [ // 愛心
-                [2,0], [4,0], [1,1], [3,1], [5,1], [0,2], [4,2], [6,2], [0,3], [4,3], [6,3], [1,4], [5,4], [2,5], [4,5], [3,6]
-            ],
-            'b': [
-                [0,0], [0,1], [0,2], [0,3], [0,4], [0,5], [0,6], [0,7], [1,1], [2,1], [3,2], [1,4], [2,4], [3,5], [1,6], [2,6]
-            ],
-            'y': [
-                [0,1], [4,1], [0,2], [4,2], [1,3], [3,3], [2,4], [2,5], [2,6], [1,7], [2,7]
-            ],
-            'm': [
-                [0,1], [0,2], [0,3], [0,4], [0,5], [0,6], [0,7], [1,2], [2,3], [3,2], [4,1], [4,2], [4,3], [4,4], [4,5], [4,6], [4,7]
-            ],
-            'g': [
-                [1,1], [2,1], [3,1], [0,2], [0,3], [0,4], [0,5], [0,6], [1,7], [2,7], [3,7], [4,7], [4,6], [4,5], [3,4], [2,4]
-            ],
-            'f': [
-                [0,0], [0,1], [0,2], [0,3], [0,4], [0,5], [0,6], [0,7], [1,1], [2,1], [3,1], [1,4], [2,4]
-            ]
-        };
-
-        const messages = [
-            { 
-                text: 'i love u',
-                content: ['i', 'space', 'l', 'o', 'v', 'e', 'space', 'heart', 'space', 'u'], 
-                lineId: "line1", 
-                delay: 500 
-            },
-            { 
-                text: 'will u be my gf',
-                content: ['w', 'i', 'l', 'l', 'space', 'u', 'space', 'b', 'e', 'space', 'm', 'y', 'space', 'g', 'f'], 
-                lineId: "line2", 
-                delay: 6000 
-            }
-        ];
-
-        let animationTimeouts = [];
-
-        function createCharacterElement(char) {
-            const charDiv = document.createElement('div');
-            
-            if (char === 'space') {
-                charDiv.className = 'space';
-                return charDiv;
-            }
-            
-            charDiv.className = 'character';
-            
-            // w字母需要更寬的容器
-            if (char === 'w') {
-                charDiv.style.width = '80px';
-            }
-            
-            const pattern = dotPatterns[char];
-            if (pattern) {
-                pattern.forEach((pos, index) => {
-                    const dot = document.createElement('div');
-                    dot.className = char === 'heart' ? 'dot heart-dot' : 'dot';
-                    // 將點陣映射到字符容器
-                    dot.style.left = (pos[0] * 8 + 8) + 'px';
-                    dot.style.top = (pos[1] * 12 + 10) + 'px';
-                    charDiv.appendChild(dot);
-                });
-            }
-            
-            return charDiv;
-        }
-
-        function animateCharacter(charElement, char, charIndex, totalDelay) {
-            if (char === 'space') return;
-            
-            const dots = charElement.querySelectorAll('.dot');
-            const isHeart = char === 'heart';
-            
-            dots.forEach((dot, index) => {
-                const timeout = setTimeout(() => {
-                    dot.style.animation = 'dotAppear 0.4s ease-out forwards';
-                    
-                    // 愛心點在顯示後持續跳動
-                    if (isHeart) {
-                        setTimeout(() => {
-                            dot.style.animation = 'dotAppear 0.4s ease-out forwards, heartPulse 2s ease-in-out infinite';
-                        }, 400);
-                    }
-                }, totalDelay + index * 80);
-                
-                animationTimeouts.push(timeout);
-            });
-        }
-
-        function startAnimation() {
-            // 清除所有現有動畫
-            animationTimeouts.forEach(timeout => clearTimeout(timeout));
-            animationTimeouts = [];
-            
-            // 清空所有行
-            document.getElementById('line1').innerHTML = '';
-            document.getElementById('line2').innerHTML = '';
-            
-            let globalCharIndex = 0;
-            
-            messages.forEach((message, messageIndex) => {
-                const line = document.getElementById(message.lineId);
-                
-                // 為每個字符創建元素
-                message.content.forEach((char, i) => {
-                    const charElement = createCharacterElement(char);
-                    line.appendChild(charElement);
-                    
-                    if (char !== 'space') {
-                        // 計算每個字的動畫延遲時間（從左到右）- 第一行較慢
-                        const baseDelay = messageIndex === 0 ? 800 : 600; // 第一行慢一點
-                        const charDelay = message.delay + globalCharIndex * baseDelay;
-                        animateCharacter(charElement, char, globalCharIndex, charDelay);
-                        globalCharIndex++;
-                    }
-                });
-            });
-        }
-
-        // 頁面載入時開始動畫
-        window.onload = function() {
-            startAnimation();
-            playAudioSequence();
-        };
+    <div class="container">
+        <div class="audio-section">
+            <audio controls>
+                <source th:src="@{/0310.wav}" type="audio/wav">
+                <source th:src="@{/0310.wav}" type="audio/mpeg">
+            </audio>
+        </div>
         
-        // 音檔播放控制
-        function playAudioSequence() {
-            // 檢查是否已經播放過（防止F5重複播放）
-            if (sessionStorage.getItem('audioPlayed')) {
-                console.log('本次會話已播放過音檔，跳過');
-                return;
-            }
-            
-            const audio1 = document.getElementById('audio1');
-            const audio2 = document.getElementById('audio2');
-            
-            if (audio1 && audio2) {
-                console.log('開始播放第一個音檔');
-                audio1.play().catch(e => console.error('播放第一個音檔失敗:', e));
-                
-                // 標記已播放
-                sessionStorage.setItem('audioPlayed', 'true');
-                
-                // 第一個音檔播放完後播放第二個
-                audio1.addEventListener('ended', function() {
-                    console.log('第一個音檔播放完成，開始播放第二個');
-                    audio2.play().catch(e => console.error('播放第二個音檔失敗:', e));
-                });
-                
-                audio2.addEventListener('ended', function() {
-                    console.log('第二個音檔播放完成');
-                });
-            } else {
-                console.log('找不到音檔元素');
-            }
-        }
-    </script>
+        <div class="credits">
+            <h3>中文by Life</h3>
+            <h3>by Life</h3>
+            <h3>by Life</h3>
+        </div>
+    </div>
 </body>
 </html>

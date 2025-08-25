@@ -431,6 +431,22 @@ public class controller {
   // 根據view resolver mapping至hello.jsp
   }
 	
+
+
+	@RequestMapping("/card2")
+	//@ResponseBody
+	public String card2(HttpServletRequest request,Model model) {
+		
+		   
+
+	    	
+	     
+	  
+	        return "succes4";  // 早上5:20到晚上17:20顯示succes5
+
+		
+	}
+	
 	@RequestMapping("/testinng")
 	//@ResponseBody
 	public String testing2(Model model) {

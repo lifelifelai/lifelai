@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>challenge</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .game-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .info-item {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .game-board {
+            border: 3px solid #343a40;
+            border-radius: 10px;
+            display: inline-block;
+            background: #000;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 2px;
+            background: #222;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell.empty {
+            background: #111;
+            cursor: default;
+        }
+
+        .cell.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cell.red {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .cell.blue {
+            background: linear-gradient(145deg, #4ecdc4, #45b7b8);
+            color: white;
+        }
+
+        .cell.green {
+            background: linear-gradient(145deg, #55a3ff, #4c94ff);
+            color: white;
+        }
+
+        .cell.yellow {
+            background: linear-gradient(145deg, #ffd93d, #ffcd02);
+            color: #333;
+        }
+
+        .cell.purple {
+            background: linear-gradient(145deg, #a55eea, #8b5cf6);
+            color: white;
+        }
+
+        .cell.box {
+            background: linear-gradient(145deg, #ff9500, #ff8c00);
+            color: white;
+        }
+
+        .cell.box::before {
+            content: '📦';
+            font-size: 1.2em;
+        }
+
+        .cell.obstacle {
+            background: linear-gradient(145deg, #6c757d, #5a6268);
+            color: white;
+            cursor: default;
+        }
+
+        .cell.obstacle:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cell.obstacle::before {
+            content: '🐱';
+            font-size: 1.2em;
+        }
+
+        .cell.selected {
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .cell.eliminating {
+            animation: eliminate 0.5s ease-out;
+        }
+
+        @keyframes eliminate {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .start-btn {
+            background: linear-gradient(145deg, #28a745, #20c997);
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(145deg, #20c997, #28a745);
+            transform: translateY(-2px);
+        }
+
+        .reset-btn {
+            background: linear-gradient(145deg, #dc3545, #fd7e14);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(145deg, #fd7e14, #dc3545);
+            transform: translateY(-2px);
+        }
+
+        .auto-btn {
+            background: linear-gradient(145deg, #17a2b8, #6f42c1);
+        }
+
+        .auto-btn:hover {
+            background: linear-gradient(145deg, #6f42c1, #17a2b8);
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            text-align: left;
+            color: #666;
+            font-size: 0.95em;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .victory-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .victory-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .victory-content h2 {
+            color: #28a745;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">Boxing</h1>
+        
+        <div class="game-info">
+            <div class="info-item">Score: <span id="score">0</span></div>
+            <div class="info-item">Remaining boxes: <span id="boxes-left">0</span></div>
+            <div class="info-item">Eliminated boxes: <span id="eliminations">0</span></div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn start-btn" onclick="startGame()">Start</button>
+            <button class="control-btn reset-btn" onclick="resetGame()">Restart</button>
+        </div>
+
+        <div class="game-board">
+            <div class="grid" id="game-grid"></div>
+        </div>
+
+        <div class="instructions">
+            <p>Clear boxes</p>
+        </div>
+    </div>
+
+    <div class="victory-message" id="victory-message">
+        <div class="victory-content">
+            <h2>🎉 恭喜過關！ 🎉</h2>
+            <p>你成功消除了所有箱子！</p>
+            <p>最終分數: <span id="final-score">0</span></p>
+            <button class="control-btn start-btn" onclick="goToCard2()">完成挑戰</button>
+            <button class="control-btn reset-btn" onclick="closeVictory()">繼續遊戲</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const ROWS = 10;
+        const COLS = 8;
+        const COLORS = ['red', 'blue', 'green', 'yellow', 'purple'];
+        const COLOR_SYMBOLS = {
+            'red': '●',
+            'blue': '●', 
+            'green': '●',
+            'yellow': '●',
+            'purple': '●'
+        };
+
+        let gameBoard = [];
+        let score = 0;
+        let boxesLeft = 0;
+        let eliminations = 0;
+        let selectedCells = [];
+        let level = 1;
+
+        function initGame() {
+            gameBoard = [];
+            for (let row = 0; row < ROWS; row++) {
+                gameBoard[row] = [];
+                for (let col = 0; col < COLS; col++) {
+                    gameBoard[row][col] = 'empty';
+                }
+            }
+        }
+
+        function generateLevel(levelNum) {
+            initGame();
+            
+            // 先用隨機彩色方塊填滿整個遊戲區域
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    gameBoard[row][col] = COLORS[Math.floor(Math.random() * COLORS.length)];
+                }
+            }
+
+            // 添加更多箱子（需要被消除的目標）
+            let boxCount = 8 + (levelNum * 3); // 增加箱子數量
+            let placedBoxes = 0;
+            let attempts = 0;
+            
+            while (placedBoxes < boxCount && attempts < 100) {
+                let row = Math.floor(Math.random() * ROWS);
+                let col = Math.floor(Math.random() * COLS);
+                
+                // 確保箱子分散放置
+                gameBoard[row][col] = 'box';
+                placedBoxes++;
+                attempts++;
+            }
+
+            // 添加障礙物（較少數量）
+            let obstacleCount = Math.floor(levelNum / 2) + 2;
+            let placedObstacles = 0;
+            attempts = 0;
+            
+            while (placedObstacles < obstacleCount && attempts < 50) {
+                let row = Math.floor(Math.random() * ROWS);
+                let col = Math.floor(Math.random() * COLS);
+                
+                if (gameBoard[row][col] !== 'obstacle' && gameBoard[row][col] !== 'box') {
+                    gameBoard[row][col] = 'obstacle';
+                    placedObstacles++;
+                }
+                attempts++;
+            }
+
+            updateBoxCount();
+        }
+
+        function renderBoard() {
+            const grid = document.getElementById('game-grid');
+            grid.innerHTML = '';
+
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${gameBoard[row][col]}`;
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    if (COLORS.includes(gameBoard[row][col])) {
+                        cell.textContent = COLOR_SYMBOLS[gameBoard[row][col]];
+                        cell.onclick = () => handleCellClick(row, col);
+                    }
+
+                    if (selectedCells.some(selected => selected.row === row && selected.col === col)) {
+                        cell.classList.add('selected');
+                    }
+
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(row, col) {
+            const cellType = gameBoard[row][col];
+            if (!COLORS.includes(cellType)) return;
+
+            // 找到所有相鄰的相同顏色方塊
+            const connectedCells = findConnectedCells(row, col, cellType);
+            
+            if (connectedCells.length >= 2) {
+                eliminateCells(connectedCells);
+            }
+        }
+
+        function findConnectedCells(startRow, startCol, targetColor) {
+            const visited = new Set();
+            const connected = [];
+            const queue = [{row: startRow, col: startCol}];
+
+            while (queue.length > 0) {
+                const {row, col} = queue.shift();
+                const key = `${row}-${col}`;
+                
+                if (visited.has(key)) continue;
+                if (row < 0 || row >= ROWS || col < 0 || col >= COLS) continue;
+                if (gameBoard[row][col] !== targetColor) continue;
+
+                visited.add(key);
+                connected.push({row, col});
+
+                // 檢查四個方向的相鄰格子 - 避免 Thymeleaf 解析衝突
+                const directions = [
+                    {row: row - 1, col: col},
+                    {row: row + 1, col: col},
+                    {row: row, col: col - 1},
+                    {row: row, col: col + 1}
+                ];
+                
+                directions.forEach(direction => {
+                    queue.push(direction);
+                });
+            }
+
+            return connected;
+        }
+
+        function eliminateCells(cellsToEliminate) {
+            // 添加消除動畫
+            cellsToEliminate.forEach(({row, col}) => {
+                const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cellElement) {
+                    cellElement.classList.add('eliminating');
+                }
+            });
+
+            setTimeout(() => {
+                // 清除被消除的格子
+                cellsToEliminate.forEach(({row, col}) => {
+                    gameBoard[row][col] = 'empty';
+                });
+
+                // 檢查並消除相鄰的箱子
+                eliminateAdjacentBoxes(cellsToEliminate);
+
+                // 方塊掉落並補充新方塊
+                dropBlocks();
+
+                // 更新分數
+                score += cellsToEliminate.length * 10;
+                eliminations++;
+                updateUI();
+
+                // 重新渲染
+                renderBoard();
+
+                // 檢查是否有連鎖反應的消除機會
+                setTimeout(() => {
+                    checkForAutoEliminations();
+                }, 300);
+
+                // 檢查勝利條件
+                if (boxesLeft === 0) {
+                    setTimeout(() => {
+                        // 直接跳轉，不顯示勝利彈窗
+                        goToCard2();
+                    }, 1000); // 給玩家1秒時間看到最後的消除效果
+                }
+            }, 500);
+        }
+
+        function checkForAutoEliminations() {
+            // 檢查是否有新的大型連接可以自動提示
+            let foundLargeGroup = false;
+            
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const cellType = gameBoard[row][col];
+                    if (COLORS.includes(cellType)) {
+                        const connected = findConnectedCells(row, col, cellType);
+                        if (connected.length >= 5) { // 如果有5個以上相連，給予提示
+                            selectedCells = connected;
+                            foundLargeGroup = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundLargeGroup) break;
+            }
+            
+            if (foundLargeGroup) {
+                renderBoard();
+                setTimeout(() => {
+                    selectedCells = [];
+                    renderBoard();
+                }, 2000);
+            }
+        }
+
+        function eliminateAdjacentBoxes(eliminatedCells) {
+            const boxesToEliminate = new Set();
+
+            eliminatedCells.forEach(({row, col}) => {
+                // 檢查四個方向的相鄰格子 - 避免 Thymeleaf 解析衝突
+                const directions = [
+                    [-1, 0], 
+                    [1, 0], 
+                    [0, -1], 
+                    [0, 1]
+                ];
+                
+                directions.forEach(([dr, dc]) => {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    
+                    if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS) {
+                        if (gameBoard[newRow][newCol] === 'box') {
+                            boxesToEliminate.add(`${newRow}-${newCol}`);
+                        }
+                    }
+                });
+            });
+
+            // 消除箱子
+            boxesToEliminate.forEach(key => {
+                const [row, col] = key.split('-').map(Number);
+                gameBoard[row][col] = 'empty';
+                score += 50; // 消除箱子額外加分
+            });
+        }
+
+        function dropBlocks() {
+            for (let col = 0; col < COLS; col++) {
+                // 收集所有非空的方塊（保持原順序）
+                const existingBlocks = [];
+                for (let row = ROWS - 1; row >= 0; row--) {
+                    if (gameBoard[row][col] !== 'empty') {
+                        existingBlocks.unshift(gameBoard[row][col]); // 保持從上到下的順序
+                    }
+                }
+                
+                // 清空整列
+                for (let row = 0; row < ROWS; row++) {
+                    gameBoard[row][col] = 'empty';
+                }
+                
+                // 計算需要補充多少新彩色方塊
+                const emptyCount = ROWS - existingBlocks.length;
+                
+                // 從上方補充新的彩色方塊（只補充顏色方塊，不包含箱子和障礙物）
+                for (let i = 0; i < emptyCount; i++) {
+                    gameBoard[i][col] = COLORS[Math.floor(Math.random() * COLORS.length)];
+                }
+                
+                // 將原有的方塊（包括箱子和障礙物）放在新彩色方塊下方
+                for (let i = 0; i < existingBlocks.length; i++) {
+                    gameBoard[emptyCount + i][col] = existingBlocks[i];
+                }
+            }
+        }
+
+        function updateBoxCount() {
+            boxesLeft = 0;
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (gameBoard[row][col] === 'box') {
+                        boxesLeft++;
+                    }
+                }
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            updateBoxCount();
+            document.getElementById('boxes-left').textContent = boxesLeft;
+            document.getElementById('eliminations').textContent = eliminations;
+        }
+
+        function findMatches() {
+            selectedCells = [];
+            
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const cellType = gameBoard[row][col];
+                    if (COLORS.includes(cellType)) {
+                        const connected = findConnectedCells(row, col, cellType);
+                        if (connected.length >= 2) {
+                            selectedCells = connected;
+                            renderBoard();
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            alert('沒有找到可消除的方塊！');
+        }
+
+        function startGame() {
+            generateLevel(level);
+            score = 0;
+            eliminations = 0;
+            updateUI();
+            renderBoard();
+        }
+
+        function resetGame() {
+            level = 1;
+            startGame();
+        }
+
+        function goToCard2() {
+            // 可以傳遞遊戲結果資料到下一個頁面
+            const gameResultData = {
+                finalScore: score,
+                level: level,
+                eliminations: eliminations,
+                gameCompleted: true
+            };
+            
+            // 將遊戲結果存到 sessionStorage，供 card2 頁面使用
+            sessionStorage.setItem('gameResult', JSON.stringify(gameResultData));
+            
+            // 直接跳轉到你的 controller
+            window.location.href = '/card2';
+        }
+
+        function nextLevel() {
+            level++;
+            closeVictory();
+            startGame();
+        }
+
+        function showVictory() {
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('victory-message').style.display = 'flex';
+        }
+
+        function closeVictory() {
+            document.getElementById('victory-message').style.display = 'none';
+        }
+
+        // 確保所有函數都在全局作用域
+        window.startGame = startGame;
+        window.resetGame = resetGame;
+        window.goToCard2 = goToCard2;
+        window.nextLevel = nextLevel;
+        window.showVictory = showVictory;
+        window.closeVictory = closeVictory;
+
+        // 初始化遊戲
+        window.onload = function() {
+            initGame();
+            renderBoard();
+        };
+    </script>
+</body>
+</html>
