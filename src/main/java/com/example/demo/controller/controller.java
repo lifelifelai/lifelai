@@ -653,7 +653,7 @@ public class controller {
 	    	   
             // 在背景播放音樂，不阻塞頁面返回
        
-	        return "succes5";  // 其他時間顯示succes4
+	        return "succes6";  // 其他時間顯示succes4
 	    }
 		
 	}
