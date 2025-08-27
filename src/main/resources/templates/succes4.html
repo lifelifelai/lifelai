@@ -1,62 +1,48 @@
 <!DOCTYPE html>
-<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音頻播放頁面</title>
+    <title>Ines Part I</title>
     <style>
         body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background: #f5f5f5;
             margin: 0;
             padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            line-height: 1.6;
         }
-
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
+            background: white;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-
-        h3 {
-            color: #333;
-            margin: 20px 0;
-            font-size: 1.5em;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
         .audio-section {
-            margin: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
+            background: #fafafa;
+            border-radius: 5px;
         }
-
         audio {
             width: 100%;
-            max-width: 400px;
-            margin: 20px 0;
-            border-radius: 8px;
+            max-width: 350px;
         }
-
-        .credits {
-            margin-top: 40px;
-            color: #666;
-            font-style: italic;
+        .content {
+            color: #333;
         }
-
-        .credits h3 {
-            color: #555;
-            font-size: 1.2em;
+        .content p {
             margin: 15px 0;
+            font-size: 16px;
+        }
+        .signature {
+            text-align: right;
+            margin-top: 30px;
+            font-style: italic;
+            color: #666;
         }
     </style>
 </head>
@@ -64,15 +50,31 @@
     <div class="container">
         <div class="audio-section">
             <audio controls>
-                <source th:src="@{/0310.wav}" type="audio/wav">
-                <source th:src="@{/0310.wav}" type="audio/mpeg">
+                <source src="/0310.wav" type="audio/wav">
+                <source src="/0310.wav" type="audio/mpeg">
             </audio>
         </div>
         
-        <div class="credits">
-            <h3>中文by Life</h3>
-            <h3>by Life</h3>
-            <h3>by Life</h3>
+        <div class="content">
+            <p>這段時間過了好久，可以追溯到跨年的時候XD，那時妳在家看煙火，比比則是被煙火嚇跑</p>
+            
+            <p>我想我沒跟妳說過，其實妳是我剛開第一天第一個認識也是唯一加line的XD我們之間的距離足足200多公里</p>
+            
+            <p>中間有段時間蠻徬徨的，也許是我太害怕我沒敢想所以也不敢許下承諾如果做不到怎麼辦，我為這樣沒有行動的自己感到抱歉</p>
+            
+            <p>我喜歡妳獨有體驗世界的方式，妳可以感受得到動物們小孩子們的純真與善良，儘管這個世界很險惡又或是不一定大家都能懂妳以及妳的付出，妳還是會用妳的方式去回應無論是愛妳或是妳愛的人</p>
+            
+            <p>我希望妳可以選擇所有妳所想要的事物，如我平常跟妳說的那樣，妳可以是貓貓在家裡巡邏</p>
+            
+            <p>可以無憂無慮地做自己，去外面闖盪，只要妳累了隨時都可以回家休息，交給兔兔，兔兔會等妳照顧妳</p>
+            
+            <p>也請妳別擔心嶄露自己不好的一面，這樣的妳才更真實更完整</p>
+            
+            <p>如果遇到挫折脆弱地碎了滿地，我會陪妳一片片撿回來慢慢一片片的好好黏回去</p>
+            
+            <p>讓我以男朋友的身分帶妳一起走妳覺得如何呢</p>
+            
+            <div class="signature">by Life</div>
         </div>
     </div>
 </body>
